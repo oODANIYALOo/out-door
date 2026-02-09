@@ -1,0 +1,24 @@
+services:
+  screego:
+#    image: screego/server:1
+    image: ghcr.io/screego/server:1.12.0
+    container_name: screen-share
+    ports:
+      - 443:5050
+      - 3478:3478
+      - 3478:3478/udp
+#    networks:
+#      my-net:
+#        ipv4_address: 192.168.1.10
+    volumes:
+      - $PWD/cert.crt:/cert.crt:ro
+      - $PWD/cert.key:/cert.key:ro
+    environment:
+      - SCREEGO_EXTERNAL_IP=192.168.1.10
+      - SCREEGO_SERVER_TLS=true
+      - SCREEGO_TLS_CERT_FILE=/cert.crt
+      - SCREEGO_TLS_KEY_FILE=/cert.key
+
+#networks:
+  #my-net:
+    #external: true
