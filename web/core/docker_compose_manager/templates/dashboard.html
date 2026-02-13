@@ -1,0 +1,78 @@
+<h2>🟢 Running</h2>
+{% for p in running %}
+<div class="card">
+  <strong>{{ p.name }}</strong>
+  <span>Ports: {{ p.ports }}</span>
+
+  <form method="post" action="{% url 'docker_compose_manager:action' %}">
+    {% csrf_token %}
+    <input type="hidden" name="project" value="{{ p.name }}">
+
+    <!-- Container Management -->
+    <button name="action" value="stop">Stop</button>
+    <button name="action" value="restart">Restart</button>
+    <button name="action" value="down">Down</button>
+
+    <!-- Info -->
+    <a href="{% url 'docker_compose_manager:stream' p.name 'logs' %}" target="_blank">
+        <button type="button">Logs</button>
+    </a>
+
+    <a href="{% url 'docker_compose_manager:stream' p.name 'status' %}" target="_blank">
+        <button type="button">Status</button>
+    </a>
+
+    <a href="{% url 'docker_compose_manager:stream' p.name 'top' %}" target="_blank">
+        <button type="button">Top</button>
+    </a>
+
+    {#    <button name="action" value="top">Top</button>#}
+  </form>
+</div>
+{% empty %}
+<p>No running projects</p>
+{% endfor %}
+
+
+
+<h2>🟡 Stopped</h2>
+{% for p in stopped %}
+<div class="card">
+  <strong>{{ p.name }}</strong>
+
+  <form method="post" action="{% url 'docker_compose_manager:action' %}">
+    {% csrf_token %}
+    <input type="hidden" name="project" value="{{ p.name }}">
+
+    <!-- Start with up (safer than start) -->
+    <button name="action" value="up">Start</button>
+
+    <button name="action" value="down">Down</button>
+    <button name="action" value="logs">Logs</button>
+  </form>
+</div>
+{% empty %}
+<p>No stopped projects</p>
+{% endfor %}
+
+
+
+<h2>🔵 Not Started</h2>
+{% for p in not_started %}
+<div class="card">
+  <strong>{{ p.name }}</strong>
+
+  <form method="post" action="{% url 'docker_compose_manager:action' %}">
+    {% csrf_token %}
+    <input type="hidden" name="project" value="{{ p.name }}">
+
+    <!-- Always use up -->
+    <button name="action" value="up">Start</button>
+
+    <button name="action" value="pull">Pull</button>
+    <button name="action" value="build">Build</button>
+  </form>
+</div>
+{% empty %}
+<p>No new projects</p>
+{% endfor %}

@@ -302,7 +302,7 @@ cmd_manage() {
             docker_compose_cmd "$project" ps
             ;;
         logs)
-            docker_compose_cmd "$project" logs -f "$@"
+            docker_compose_cmd "$project" logs "$@"
             ;;
         port)
             docker_compose_cmd "$project" ps --format "table {{.Names}}\t{{.Ports}}"
