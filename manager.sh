@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# ============================================
-# Docker Compose Manager Script
-# Version: 2.0.3
-# Description: Complete management for docker compose projects
-# ============================================
 
 set -euo pipefail
 
