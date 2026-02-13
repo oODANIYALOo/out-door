@@ -1,78 +1,145 @@
-<h2>🟢 Running</h2>
-{% for p in running %}
-<div class="card">
-  <strong>{{ p.name }}</strong>
-  <span>Ports: {{ p.ports }}</span>
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Compose Manager</title>
 
-  <form method="post" action="{% url 'docker_compose_manager:action' %}">
-    {% csrf_token %}
-    <input type="hidden" name="project" value="{{ p.name }}">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 
-    <!-- Container Management -->
-    <button name="action" value="stop">Stop</button>
-    <button name="action" value="restart">Restart</button>
-    <button name="action" value="down">Down</button>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- Info -->
-    <a href="{% url 'docker_compose_manager:stream' p.name 'logs' %}" target="_blank">
-        <button type="button">Logs</button>
-    </a>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .glass {
+      background: rgba(30,41,59,.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .card-hover { transition: .25s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+    .btn-action { transition: .2s ease; }
+    .btn-action:hover { transform: scale(1.05); }
+    .btn-action:active { transform: scale(.95); }
+  </style>
+</head>
 
-    <a href="{% url 'docker_compose_manager:stream' p.name 'status' %}" target="_blank">
-        <button type="button">Status</button>
-    </a>
+<body class="bg-slate-950 text-white min-h-full">
 
-    <a href="{% url 'docker_compose_manager:stream' p.name 'top' %}" target="_blank">
-        <button type="button">Top</button>
-    </a>
+<div class="max-w-7xl mx-auto p-6">
 
-    {#    <button name="action" value="top">Top</button>#}
-  </form>
+  <!-- HEADER -->
+  <header class="mb-10">
+    <h1 class="text-3xl font-bold mb-2">Docker Compose Manager</h1>
+    <p class="text-slate-400 text-sm">Manage your containerized applications</p>
+  </header>
+
+
+  <!-- RUNNING -->
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4 text-green-400">🟢 Running</h2>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for p in running %}
+      <div class="glass rounded-2xl p-5 card-hover">
+
+        <div class="mb-4">
+          <h3 class="mono text-sm font-semibold">{{ p.name }}</h3>
+          {% if p.ports %}
+          <p class="text-xs text-slate-400">Ports: {{ p.ports }}</p>
+          {% endif %}
+        </div>
+
+        <form method="post" action="{% url 'docker_compose_manager:action' %}">
+          {% csrf_token %}
+          <input type="hidden" name="project" value="{{ p.name }}">
+
+          <div class="flex flex-wrap gap-2 mb-3">
+            <button name="action" value="stop" class="btn-action px-3 py-1.5 rounded bg-red-500/20 text-red-400">Stop</button>
+            <button name="action" value="restart" class="btn-action px-3 py-1.5 rounded bg-yellow-500/20 text-yellow-400">Restart</button>
+            <button name="action" value="down" class="btn-action px-3 py-1.5 rounded bg-slate-500/20 text-slate-400">Down</button>
+          </div>
+        </form>
+
+        <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-700/50">
+          <a target="_blank" href="{% url 'docker_compose_manager:stream' p.name 'logs' %}"
+             class="btn-action px-3 py-1.5 rounded bg-blue-500/20 text-blue-400">Logs</a>
+
+          <a target="_blank" href="{% url 'docker_compose_manager:stream' p.name 'status' %}"
+             class="btn-action px-3 py-1.5 rounded bg-purple-500/20 text-purple-400">Status</a>
+
+          <a target="_blank" href="{% url 'docker_compose_manager:stream' p.name 'top' %}"
+             class="btn-action px-3 py-1.5 rounded bg-cyan-500/20 text-cyan-400">Top</a>
+        </div>
+
+      </div>
+    {% empty %}
+      <p class="text-slate-500 text-sm italic">No running projects</p>
+    {% endfor %}
+    </div>
+  </section>
+
+
+
+  <!-- STOPPED -->
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4 text-yellow-400">🟡 Stopped</h2>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for p in stopped %}
+      <div class="glass rounded-2xl p-5 card-hover">
+
+        <h3 class="mono text-sm font-semibold mb-4">{{ p.name }}</h3>
+
+        <form method="post" action="{% url 'docker_compose_manager:action' %}">
+          {% csrf_token %}
+          <input type="hidden" name="project" value="{{ p.name }}">
+
+          <div class="flex flex-wrap gap-2">
+            <button name="action" value="up" class="btn-action px-3 py-1.5 rounded bg-green-500/20 text-green-400">Start</button>
+            <button name="action" value="down" class="btn-action px-3 py-1.5 rounded bg-slate-500/20 text-slate-400">Down</button>
+            <button name="action" value="logs" class="btn-action px-3 py-1.5 rounded bg-blue-500/20 text-blue-400">Logs</button>
+          </div>
+        </form>
+
+      </div>
+    {% empty %}
+      <p class="text-slate-500 text-sm italic">No stopped projects</p>
+    {% endfor %}
+    </div>
+  </section>
+
+
+
+  <!-- NOT STARTED -->
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4 text-blue-400">🔵 Not Started</h2>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for p in not_started %}
+      <div class="glass rounded-2xl p-5 card-hover">
+
+        <h3 class="mono text-sm font-semibold mb-4">{{ p.name }}</h3>
+
+        <form method="post" action="{% url 'docker_compose_manager:action' %}">
+          {% csrf_token %}
+          <input type="hidden" name="project" value="{{ p.name }}">
+
+          <div class="flex flex-wrap gap-2">
+            <button name="action" value="up" class="btn-action px-3 py-1.5 rounded bg-green-500/20 text-green-400">Start</button>
+            <button name="action" value="pull" class="btn-action px-3 py-1.5 rounded bg-purple-500/20 text-purple-400">Pull</button>
+            <button name="action" value="build" class="btn-action px-3 py-1.5 rounded bg-orange-500/20 text-orange-400">Build</button>
+          </div>
+        </form>
+
+      </div>
+    {% empty %}
+      <p class="text-slate-500 text-sm italic">No new projects</p>
+    {% endfor %}
+    </div>
+  </section>
+
 </div>
-{% empty %}
-<p>No running projects</p>
-{% endfor %}
-
-
-
-<h2>🟡 Stopped</h2>
-{% for p in stopped %}
-<div class="card">
-  <strong>{{ p.name }}</strong>
-
-  <form method="post" action="{% url 'docker_compose_manager:action' %}">
-    {% csrf_token %}
-    <input type="hidden" name="project" value="{{ p.name }}">
-
-    <!-- Start with up (safer than start) -->
-    <button name="action" value="up">Start</button>
-
-    <button name="action" value="down">Down</button>
-    <button name="action" value="logs">Logs</button>
-  </form>
-</div>
-{% empty %}
-<p>No stopped projects</p>
-{% endfor %}
-
-
-
-<h2>🔵 Not Started</h2>
-{% for p in not_started %}
-<div class="card">
-  <strong>{{ p.name }}</strong>
-
-  <form method="post" action="{% url 'docker_compose_manager:action' %}">
-    {% csrf_token %}
-    <input type="hidden" name="project" value="{{ p.name }}">
-
-    <!-- Always use up -->
-    <button name="action" value="up">Start</button>
-
-    <button name="action" value="pull">Pull</button>
-    <button name="action" value="build">Build</button>
-  </form>
-</div>
-{% empty %}
-<p>No new projects</p>
-{% endfor %}
+</body>
+</html>
